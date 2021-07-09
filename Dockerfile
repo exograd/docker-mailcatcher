@@ -61,4 +61,4 @@ RUN apt-get update -y && \
 
 USER mailcatcher:mailcatcher
 
-ENTRYPOINT ["mailcatcher", "--ip=0.0.0.0", "--foreground", "--no-quit", "--verbose"]
+ENTRYPOINT ["mailcatcher", "--ip", "0.0.0.0", "--foreground", "--no-quit", "--verbose"]
