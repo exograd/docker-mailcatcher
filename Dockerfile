@@ -4,8 +4,8 @@ ENV DEBIAN_FRONTEND noninteractive
 
 ENV RUBY_VERSION "3.0.2"
 ENV RUBY_SHA256 "5085dee0ad9f06996a8acec7ebea4a8735e6fac22f22e2d98c3f2bc3bef7e6f1  ruby-3.0.2.tar.gz"
-ENV MAILCATCHER_VERSION "0.7.1"
-ENV MAILCATCHER_SHA256 "166037f917109995ef51485df20bddb8dc62543f9fa67412d4a09fed3cf3810b  mailcatcher-0.7.1.gem"
+ENV MAILCATCHER_VERSION "0.8.0"
+ENV MAILCATCHER_SHA256 "6ca1fa25641b0996adce8f15535566afeec8e17cc3d32dc1feda83ffd11511b3  mailcatcher-0.8.0.gem"
 
 RUN apt-get update -y && \
     apt-get install -y \
