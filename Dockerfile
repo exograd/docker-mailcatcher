@@ -1,64 +1,39 @@
-FROM ubuntu:20.04
+# syntax=docker/dockerfile:1.4
 
-ENV DEBIAN_FRONTEND noninteractive
+FROM alpine:3.16
 
-ENV RUBY_VERSION "3.0.2"
-ENV RUBY_SHA256 "5085dee0ad9f06996a8acec7ebea4a8735e6fac22f22e2d98c3f2bc3bef7e6f1  ruby-3.0.2.tar.gz"
-ENV MAILCATCHER_VERSION "0.8.0"
-ENV MAILCATCHER_SHA256 "6ca1fa25641b0996adce8f15535566afeec8e17cc3d32dc1feda83ffd11511b3  mailcatcher-0.8.0.gem"
+ENV LANG en_US.utf8
 
-RUN apt-get update -y && \
-    apt-get install -y \
-                    --no-install-recommends \
-                    build-essential \
-                    libssl-dev \
-                    wget \
-                    ruby \
-                    autoconf \
-                    ca-certificates \
-                    libjemalloc-dev \
-                    zlib1g-dev \
-                    libsqlite3-dev \
-                    wget && \
-    rm -rf /var/lib/apt/lists/* && \
-    \
-    mkdir -p /usr/local/etc && \
-    { \
-      echo 'install: --no-document'; \
-      echo 'update: --no-document'; \
-    } >> /usr/local/etc/gemrc && \
-    \
-    cd /tmp && \
-    wget -q https://cache.ruby-lang.org/pub/ruby/3.0/ruby-$RUBY_VERSION.tar.gz && \
-    tar -xzf ruby-$RUBY_VERSION.tar.gz && \
-    echo $RUBY_SHA256 | sha256sum --check && \
-    cd ruby-$RUBY_VERSION && \
-    autoconf && \
-    ./configure --disable-install-doc \
-                --disable-install-rdoc \
-                --enable-shared \
-                --with-jemalloc && \
-    make && \
-    make install && \
-    rm -rf /tmp/ruby-$RUBY_VERSION.tar.gz /tmp/ruby-$RUBY_VERSION && \
-    cd /tmp && \
-    wget -q https://github.com/sj26/mailcatcher/releases/download/v$MAILCATCHER_VERSION/mailcatcher-$MAILCATCHER_VERSION.gem && \
-    echo $MAILCATCHER_SHA256 | sha256sum --check && \
-    gem install mailcatcher-$MAILCATCHER_VERSION.gem && \
-    rm -rf mailcatcher-$MAILCATCHER_VERSION.gem && \
-    groupadd -g 2001 mailcatcher && \
-    useradd -m -g mailcatcher -u 2001 mailcatcher && \
-    apt-get remove --purge \
-                   -y \
-                   --allow-remove-essential \
-                   wget \
-                   autoconf \
-                   ruby \
-                   ca-certificates \
-                   build-essential && \
-    apt-get autoremove -y && \
-    apt-get clean -y
+RUN <<EOF
+    set -eu
+
+    apk --no-cache add ruby openssl sqlite-libs libstdc++
+    apk --no-cache --virtual mailcatcher-build add \
+      curl build-base ruby-dev openssl-dev sqlite-dev
+
+    gem install net-smtp
+
+    version=0.8.2
+    gem_file=mailcatcher-$version.gem
+    gem_repository=https://github.com/sj26/mailcatcher
+    gem_uri=$gem_repository/releases/download/v$version/$gem_file
+    checksum=e48e9436bbb71117e5494f4e3865b7666d003cee34eb1849e3df98e7023da5fd
+
+    cd /tmp
+    curl -sSfL -o $gem_file $gem_uri
+    echo "$checksum  $gem_file" | sha256sum -c
+    gem install $gem_file
+    rm $gem_file
+    cd -
+
+    apk del mailcatcher-build
+
+    addgroup -S mailcatcher
+    adduser -G mailcatcher -g Mailcatcher -H -D mailcatcher
+EOF
 
 USER mailcatcher:mailcatcher
 
-ENTRYPOINT ["mailcatcher", "--ip", "0.0.0.0", "--foreground", "--no-quit", "--verbose"]
+EXPOSE 1025/TCP 1080/TCP
+
+CMD ["mailcatcher", "--ip", "0.0.0.0", "--foreground", "--no-quit"]
