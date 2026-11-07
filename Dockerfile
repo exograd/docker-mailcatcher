@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.4
 
-FROM alpine:3.16
+FROM alpine:3.24
 
 ENV LANG en_US.utf8
 
@@ -13,11 +13,11 @@ RUN <<EOF
 
     gem install net-smtp
 
-    version=0.8.2
+    version=0.10.0
     gem_file=mailcatcher-$version.gem
     gem_repository=https://github.com/sj26/mailcatcher
     gem_uri=$gem_repository/releases/download/v$version/$gem_file
-    checksum=e48e9436bbb71117e5494f4e3865b7666d003cee34eb1849e3df98e7023da5fd
+    checksum=f59b6fe184687bdad2b3a4532b79bb331b35830f1d0dccf20750de4663d5030d
 
     cd /tmp
     curl -sSfL -o $gem_file $gem_uri

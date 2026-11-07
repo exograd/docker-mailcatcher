@@ -1,18 +1,18 @@
-NAME = exograd/mailcatcher
-VERSION = latest
-TAG = $(NAME):$(VERSION)
+name = exograd/mailcatcher
+version = latest
+ref = $(name):$(version)
 
-IMAGES = $(shell docker images -q $(NAME))
+images = $(shell docker images -q $(name))
 
 all: build
 
 build:
-	DOCKER_BUILDKIT=1 docker build --no-cache --tag $(TAG) .
+	DOCKER_BUILDKIT=1 docker build --no-cache --tag $(ref) .
 
 release: build
-	docker push $(TAG)
+	docker push $(ref)
 
 clean:
-	[ -n "$(IMAGES)" ] && docker rmi $(IMAGES)
+	[ -n "$(images)" ] && docker rmi $(images)
 
 .PHONY: all build release clean
