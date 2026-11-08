@@ -2,6 +2,9 @@
 
 FROM alpine:3.24
 
+ARG MAILCATCHER_VERSION
+ARG MAILCATCHER_CHECKSUM
+
 ENV LANG en_US.utf8
 
 RUN <<EOF
@@ -13,11 +16,11 @@ RUN <<EOF
 
     gem install net-smtp
 
-    version=0.10.0
+    version=$MAILCATCHER_VERSION
+    checksum=$MAILCATCHER_CHECKSUM
     gem_file=mailcatcher-$version.gem
     gem_repository=https://github.com/sj26/mailcatcher
     gem_uri=$gem_repository/releases/download/v$version/$gem_file
-    checksum=f59b6fe184687bdad2b3a4532b79bb331b35830f1d0dccf20750de4663d5030d
 
     cd /tmp
     curl -sSfL -o $gem_file $gem_uri
